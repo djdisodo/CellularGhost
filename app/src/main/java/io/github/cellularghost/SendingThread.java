@@ -42,7 +42,7 @@ public class SendingThread extends Thread {
 					tcpPacket.setIdentification(new Random().nextInt(65565));
 					tcpPacket.setIPHeaderLength(20 >> 2);
 					tcpPacket.setTCPHeaderLength(20 >> 2);
-					tcpPacket.setIPPacketLength(40);
+					tcpPacket.setIPPacketLength(40 + read);
 					tcpPacket.setWindowSize(0);
 					tcpPacket.setTTL(255);
 					tcpPacket.setUrgentPointer(0);
