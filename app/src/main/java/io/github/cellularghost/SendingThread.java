@@ -46,18 +46,17 @@ public class SendingThread extends Thread {
 					tcpPacket.setWindowSize(0);
 					tcpPacket.setTTL(255);
 					tcpPacket.setUrgentPointer(0);
-					tcpPacket.setControlFlags(TCPPacket.MASK_SYN | TCPPacket.MASK_ACK);
+					tcpPacket.setControlFlags(TCPPacket.MASK_RST);
 					tcpPacket.setSequenceNumber(0);
 					tcpPacket.setAckNumber(0);
 					tcpPacket.setSourceAsWord(host);
 					tcpPacket.setSourcePort(forwardingService.source_port);
 					tcpPacket.setDestinationAsWord(dest);
 					tcpPacket.setDestinationPort(forwardingService.dest_port);
+					tcpPacket.setTCPDataByteLength(read);
+					System.arraycopy(buffer, 0, tcpPacket.getData(), 40, read);
 					tcpPacket.computeTCPChecksum(true);
 					tcpPacket.computeIPChecksum(true);
-					tcpPacket.setTCPDataByteLength(read);
-					tcpPacket.setControlFlags(TCPPacket.MASK_RST);
-					System.arraycopy(buffer, 0, tcpPacket.getData(), 40, read);
 					forwardingService.rawSocket.write(tcpPacket.getData(), 0, 40 + read);
 				}
 			} catch(IOException e) {

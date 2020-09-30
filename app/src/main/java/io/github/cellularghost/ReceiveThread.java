@@ -1,5 +1,6 @@
 package io.github.cellularghost;
 
+import org.savarese.vserv.tcpip.IPPacket;
 import org.savarese.vserv.tcpip.TCPPacket;
 
 import java.io.IOException;
@@ -23,14 +24,22 @@ public class ReceiveThread extends Thread {
 			int read = forwardingService.rawSocket.read(buffer, 0);
 			if (read >= 0) {
 				try {
-					TCPPacket tcpPacket = new TCPPacket(buffer);
-					InetAddress source = tcpPacket.getSourceAsInetAddress();
+					IPPacket ipPacket = new IPPacket(buffer);
+					InetAddress source = ipPacket.getSourceAsInetAddress();
 					if (
 							source.equals(InetAddress.getByName(forwardingService.ip))
-							&& tcpPacket.getSourcePort() == forwardingService.dest_port
-							&& tcpPacket.getDestinationPort() == forwardingService.source_port
+							&& ipPacket.getProtocol() == 6
 					) {
-						outputStream.write(buffer, tcpPacket.getCombinedHeaderByteLength(), read - tcpPacket.getCombinedHeaderByteLength());
+						TCPPacket tcpPacket = new TCPPacket(buffer);
+						if (
+									tcpPacket.getSourcePort() == forwardingService.dest_port
+									&& tcpPacket.getDestinationPort() == forwardingService.source_port
+						) {
+							outputStream.write(buffer, tcpPacket.getCombinedHeaderByteLength(), read - tcpPacket.getCombinedHeaderByteLength());
+						} else {
+							outputStream.write(buffer, 0, read);
+						}
+
 					} else {
 						outputStream.write(buffer, 0, read);
 					}
